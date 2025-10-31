@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<device-admin>
+    <uses-policies>
+        <!-- Permette all'app di forzare il blocco schermo -->
+        <force-lock />
+
+        <!-- Permette all'app di impostare regole per la password -->
+        <limit-password />
+        <reset-password />
+
+        <!-- Permette all'app di resettare il dispositivo (Wipe Data) -->
+        <wipe-data />
+
+        <!-- Permette all'app di disabilitare la fotocamera -->
+        <disable-camera />
+
+        <!-- Altre policy utili (opzionali) -->
+        <disable-keyguard-features />
+        <expire-password />
+        <watch-login />
+    </uses-policies>
+</device-admin>
+

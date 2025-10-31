@@ -1,0 +1,11 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Tema di base dell'applicazione (per Modalità Diurna) -->
+    <style name="Theme.AdminApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Puoi personalizzare il tuo tema qui -->
+        <!-- Esempio:
+        <item name="colorPrimary">@color/my_light_primary</item>
+        <item name="colorSecondary">@color/my_light_secondary</item>
+        -->
+    </style>
+</resources>
+

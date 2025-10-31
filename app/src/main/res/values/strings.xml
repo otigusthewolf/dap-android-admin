@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">AdminApp (dap)</string>
+
+    <!-- Descrizione mostrata all'utente durante l'attivazione dell'admin -->
+    <string name="device_admin_description">
+        Questa app richiede permessi di amministrazione avanzati per proteggere l\'app dalla disinstallazione e per applicare le policy di sicurezza del dispositivo.
+    </string>
+</resources>
+
