@@ -1,0 +1,63 @@
+# Nome del workflow, apparirà nella scheda "Actions" di GitHub
+name: "Analisi di Sicurezza CodeQL"
+
+# Definisce quando questo workflow deve essere eseguito
+on:
+  # Esegui quando fai un "push" sul branch principale
+  push:
+    branches: [ "main" ] # Cambia in "master" se il tuo branch si chiama così
+  # Esegui anche sulle "pull request" fatte verso il branch principale
+  pull_request:
+    branches: [ "main" ]
+  # Esegui anche a un orario fisso (es. ogni Lunedì alle 5:30 UTC)
+  schedule:
+    - cron: '30 5 * * 1'
+
+# Definisce i "lavori" (jobs) da eseguire
+jobs:
+  analyze:
+    name: Analisi CodeQL
+    # Esegui su un server Ubuntu standard di GitHub
+    runs-on: ubuntu-latest
+
+    # Permessi necessari al workflow per leggere il codice
+    # e scrivere i risultati nella scheda "Security"
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Specifichiamo la lingua. Per Android (Java/Kotlin),
+        # usiamo 'java-kotlin'.
+        language: [ 'java-kotlin' ]
+
+    # Passaggi (steps) che il server eseguirà
+    steps:
+    # 1. Scarica il tuo codice sul server
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # 2. Inizializza lo scanner CodeQL per la lingua scelta
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+        # (Opzionale) Decommenta la riga seguente per un'analisi più approfondita
+        # (potrebbe richiedere più tempo e trovare più falsi positivi)
+        # query-suite: 'security-extended'
+
+    # 3. CodeQL per Java/Kotlin ha bisogno di "guardare" l'app mentre viene compilata.
+    # L'azione Autobuild è intelligente e capisce da sola
+    # che deve eseguire "./gradlew build" o "./gradlew assemble".
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v3
+
+    # 4. Esegui l'analisi finale e carica i risultati su GitHub
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{matrix.language}}"
+
