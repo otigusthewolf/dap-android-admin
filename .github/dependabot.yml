@@ -1,0 +1,26 @@
+# Versione della sintassi di configurazione di Dependabot
+version: 2
+
+# Elenco degli ecosistemi da monitorare per gli aggiornamenti
+updates:
+
+  # Configurazione per il nostro progetto Android (che usa Gradle)
+  - package-ecosystem: "gradle"
+
+    # Dice a Dependabot di cercare i file build.gradle.kts
+    # nella cartella principale del repository.
+    directory: "/"
+
+    # Frequenza con cui Dependabot deve controllare gli aggiornamenti
+    schedule:
+      interval: "daily" # Controlla ogni giorno
+
+    # (Opzionale) Aggiungi il tuo nome utente GitHub qui
+    # per essere assegnato automaticamente alle Pull Request
+    # assignees:
+    #  - "tuo-nome-utente-github"
+
+    # (Opzionale) Etichette da aggiungere alle Pull Request
+    labels:
+      - "dependencies"
+      - "security"
