@@ -73,10 +73,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      # 5. Installa l'SDK Android
+      # 5. Installa l'SDK Android (specificando le API corrette)
       # Questo è il passaggio mancante. Il server ha bisogno degli strumenti SDK.
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          api-level: 34
+          build-tools: 34.0.0
 
       # 6. Accetta le licenze SDK
       # Necessario, altrimenti la build fallisce chiedendo l'accettazione.
@@ -88,8 +91,12 @@ jobs:
         run: chmod +x ./gradlew
 
       # 8. Compila il progetto (CodeQL osserverà questo processo)
+      #    Abbiamo unito 'unset' e 'build' per assicurarci
+      #    che la variabile d'ambiente sia disattivata per la build.
       - name: Build with Gradle
-        run: ./gradlew assembleDebug
+        run: |
+          unset JAVA_TOOL_OPTIONS
+          ./gradlew assembleDebug
       # --- FINE CORREZIONE BUILD ---
 
 
