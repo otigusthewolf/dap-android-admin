@@ -5,11 +5,11 @@ name: "CodeQL Advanced"
 on:
   # Esegui quando fai un "push" su QUALSIASI branch
   push:
-    # Il filtro 'branches' è stato rimosso per includere tutti i branch
+  # Il filtro 'branches' è stato rimosso per includere tutti i branch
 
-  # Esegui anche sulle "pull request" fatte verso QUALSIASI branch
+  # Esegui anche sulle "pull request" fatte verso QUALSIFASI branch
   pull_request:
-    # Il filtro 'branches' è stato rimosso
+  # Il filtro 'branches' è stato rimosso
 
   # Esegui anche a un orario fisso (es. ogni Lunedì alle 5:30 UTC)
   schedule:
@@ -38,37 +38,55 @@ jobs:
 
     # Passaggi (steps) che il server eseguirà
     steps:
-    # 1. Scarica il tuo codice sul server
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      # 1. Scarica il tuo codice sul server
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    # 2. Inizializza lo scanner CodeQL per la lingua scelta
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
-      with:
-        languages: ${{ matrix.language }}
-        # (Opzionale) Decommenta la riga seguente per un'analisi più approfondita
-        # (potrebbe richiedere più tempo e trovare più falsi positivi)
-        # query-suite: 'security-extended'
-
-
-    # --- INIZIO CORREZIONE AUTOBUILD ---
-    # Sostituiamo "Autobuild" con i passaggi di build manuali per Android/Gradle
-
-    # 3. Rendi eseguibile lo script di build Gradle (necessario sui server Linux)
-    - name: Make gradlew executable
-      run: chmod +x ./gradlew
-
-    # 4. Compila il progetto (CodeQL osserverà questo processo)
-    # Eseguiamo "assembleDebug" che è più veloce di "build" completo
-    - name: Build with Gradle
-      run: ./gradlew assembleDebug
-    # --- FINE CORREZIONE AUTOBUILD ---
+      # 2. Inizializza lo scanner CodeQL per la lingua scelta
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          # (Opzionale) Decommenta la riga seguente per un'analisi più approfondita
+          # query-suite: 'security-extended'
 
 
-    # 5. Esegui l'analisi finale e carica i risultati su GitHub
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
-      with:
-        category: "/language:${{matrix.language}}"
+      # --- INIZIO NUOVA CORREZIONE ---
+
+      # 3. Imposta l'ambiente Java (JDK 17)
+      # Questo è FONDAMENTALE perché i server di GitHub non hanno
+      # il JDK Android di default.
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # 4. (Opzionale ma raccomandato) Aggiungi cache per Gradle
+      # Questo velocizza molto le build future
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      # 5. Rendi eseguibile lo script di build Gradle
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      # 6. Compila il progetto (CodeQL osserverà questo processo)
+      - name: Build with Gradle
+        run: ./gradlew assembleDebug
+      # --- FINE NUOVA CORREZIONE ---
+
+
+      # 7. Esegui l'analisi finale e carica i risultati su GitHub
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
 
