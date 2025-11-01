@@ -17,6 +17,6 @@ Questo le conferisce privilegi amministrativi di altissimo livello, tra cui:
 + **Gestione Policy:** Applica policy di sicurezza.
 + **Gestore App:** Visualizza un elenco di tutte le app e permette il **blocco**/**sblocco**
 ## 🛠️ Prerequisiti per il Build
-+ **Android Studio**
++ **Android Studio** (aggiornato all'ultima versione)
 + **Emulatore Android**
 + **ADB**
