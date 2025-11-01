@@ -51,11 +51,10 @@ jobs:
           # query-suite: 'security-extended'
 
 
-      # --- INIZIO NUOVA CORREZIONE ---
+      # --- INIZIO CORREZIONE BUILD ---
 
       # 3. Imposta l'ambiente Java (JDK 17)
-      # Questo è FONDAMENTALE perché i server di GitHub non hanno
-      # il JDK Android di default.
+      # Necessario per compilare un progetto Android moderno.
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -74,17 +73,27 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      # 5. Rendi eseguibile lo script di build Gradle
+      # 5. Installa l'SDK Android
+      # Questo è il passaggio mancante. Il server ha bisogno degli strumenti SDK.
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      # 6. Accetta le licenze SDK
+      # Necessario, altrimenti la build fallisce chiedendo l'accettazione.
+      - name: Accept Android SDK licenses
+        run: yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
+
+      # 7. Rendi eseguibile lo script di build Gradle
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      # 6. Compila il progetto (CodeQL osserverà questo processo)
+      # 8. Compila il progetto (CodeQL osserverà questo processo)
       - name: Build with Gradle
         run: ./gradlew assembleDebug
-      # --- FINE NUOVA CORREZIONE ---
+      # --- FINE CORREZIONE BUILD ---
 
 
-      # 7. Esegui l'analisi finale e carica i risultati su GitHub
+      # 9. Esegui l'analisi finale e carica i risultati su GitHub
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
