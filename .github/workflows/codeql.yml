@@ -3,12 +3,14 @@ name: "CodeQL Advanced"
 
 # Definisce quando questo workflow deve essere eseguito
 on:
-  # Esegui quando fai un "push" sul branch principale
+  # Esegui quando fai un "push" su QUALSIASI branch
   push:
-   # branches: [ "main" ] # Cambia in "master" se il tuo branch si chiama così
-  # Esegui anche sulle "pull request" fatte verso il branch principale
+    # Il filtro 'branches' è stato rimosso per includere tutti i branch
+
+  # Esegui anche sulle "pull request" fatte verso QUALSIASI branch
   pull_request:
-   # branches: [ "main" ]
+    # Il filtro 'branches' è stato rimosso
+
   # Esegui anche a un orario fisso (es. ogni Lunedì alle 5:30 UTC)
   schedule:
     - cron: '30 5 * * 1'
@@ -49,14 +51,24 @@ jobs:
         # (potrebbe richiedere più tempo e trovare più falsi positivi)
         # query-suite: 'security-extended'
 
-    # 3. CodeQL per Java/Kotlin ha bisogno di "guardare" l'app mentre viene compilata.
-    # L'azione Autobuild è intelligente e capisce da sola
-    # che deve eseguire "./gradlew build" o "./gradlew assemble".
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v3
 
-    # 4. Esegui l'analisi finale e carica i risultati su GitHub
+    # --- INIZIO CORREZIONE AUTOBUILD ---
+    # Sostituiamo "Autobuild" con i passaggi di build manuali per Android/Gradle
+
+    # 3. Rendi eseguibile lo script di build Gradle (necessario sui server Linux)
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
+
+    # 4. Compila il progetto (CodeQL osserverà questo processo)
+    # Eseguiamo "assembleDebug" che è più veloce di "build" completo
+    - name: Build with Gradle
+      run: ./gradlew assembleDebug
+    # --- FINE CORREZIONE AUTOBUILD ---
+
+
+    # 5. Esegui l'analisi finale e carica i risultati su GitHub
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
       with:
         category: "/language:${{matrix.language}}"
+
