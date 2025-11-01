@@ -5,10 +5,10 @@ name: "CodeQL Advanced"
 on:
   # Esegui quando fai un "push" sul branch principale
   push:
-    branches: [ "main" ] # Cambia in "master" se il tuo branch si chiama così
+   # branches: [ "main" ] # Cambia in "master" se il tuo branch si chiama così
   # Esegui anche sulle "pull request" fatte verso il branch principale
   pull_request:
-    branches: [ "main" ]
+   # branches: [ "main" ]
   # Esegui anche a un orario fisso (es. ogni Lunedì alle 5:30 UTC)
   schedule:
     - cron: '30 5 * * 1'
