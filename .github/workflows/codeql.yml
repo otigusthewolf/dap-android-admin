@@ -1,5 +1,5 @@
 # Nome del workflow, apparirà nella scheda "Actions" di GitHub
-name: "Analisi di Sicurezza CodeQL"
+name: "CodeQL"
 
 # Definisce quando questo workflow deve essere eseguito
 on:
