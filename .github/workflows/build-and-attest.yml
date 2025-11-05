@@ -3,7 +3,7 @@ name: "Build and Attest APK"
 
 # Definisce quando questo workflow deve essere eseguito
 on:
-  # Esegui manually dalla scheda Actions di GitHub
+  # Esegui manualmente dalla scheda Actions di GitHub
   workflow_dispatch:
     inputs:
       version:
@@ -30,68 +30,68 @@ jobs:
       attestations: write
 
     steps:
-      # 1. Scarica il tuo codice sul server
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    # 1. Scarica il tuo codice sul server
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      # 2. Imposta l'ambiente Java (JDK 17)
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
+    # 2. Imposta l'ambiente Java (JDK 17)
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
 
-      # 3. Cache per Gradle
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+    # 3. Cache per Gradle
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
 
-      # 4. Installa l'SDK Android (API 36)
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          api-level: 36
-          build-tools: 36.0.0
+    # 4. Installa l'SDK Android (SINTASSI CORRETTA v3)
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      with:
+        # Usiamo 'packages' invece dei vecchi 'api-level' e 'build-tools'
+        packages: 'platforms;android-36 build-tools;36.0.0'
+        
+    # 5. Accetta le licenze SDK
+    - name: Accept Android SDK licenses
+      run: yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
 
-      # 5. Accetta le licenze SDK
-      - name: Accept Android SDK licenses
-        run: yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
+    # 6. Rendi eseguibile lo script di build Gradle
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
 
-      # 6. Rendi eseguibile lo script di build Gradle
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
+    # 7. Compila il progetto
+    - name: Build debug APK
+      run: |
+        unset JAVA_TOOL_OPTIONS
+        ./gradlew assembleDebug
 
-      # 7. Compila il progetto
-      - name: Build debug APK
-        run: |
-          unset JAVA_TOOL_OPTIONS
-          ./gradlew assembleDebug
+    # 8. Genera l'attestazione SLSA per l'APK
+    - name: Attest build provenance
+      id: attest # Assegna un ID a questo step per referenziarlo
+      uses: actions/attest-build-provenance@v1
+      with:
+        # Percorso al tuo APK compilato
+        subject-path: app/build/outputs/apk/debug/app-debug.apk
+        
+    # 9. Carica l'APK compilato come artefatto
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-debug-apk
+        path: app/build/outputs/apk/debug/app-debug.apk
 
-      # 8. Genera l'attestazione SLSA per l'APK
-      - name: Attest build provenance
-        id: attest # Assegna un ID a questo step per referenziarlo
-        uses: actions/attest-build-provenance@v1
-        with:
-          # Percorso al tuo APK compilato
-          subject-path: app/build/outputs/apk/debug/app-debug.apk
-
-      # 9. Carica l'APK compilato come artefatto
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
-
-      # 10. Carica l'attestazione come artefatto
-      - name: Upload attestation artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: attestation-jsonl
-          # Usa l'output dello step 'attest' per trovare il file
-          path: ${{ steps.attest.outputs.attestation-path }}
+    # 10. Carica l'attestazione come artefatto
+    - name: Upload attestation artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: attestation-jsonl
+        # Usa l'output dello step 'attest' per trovare il file
+        path: ${{ steps.attest.outputs.attestation-path }}
