@@ -17,10 +17,25 @@ updates:
 
     # (Opzionale) Aggiungi il tuo nome utente GitHub qui
     # per essere assegnato automaticamente alle Pull Request
-    # assignees:
-    #  - "tuo-nome-utente-github"
+    assignees:
+      - "otigusthewolf"
 
     # (Opzionale) Etichette da aggiungere alle Pull Request
+    labels:
+      - "dependencies"
+      - "security"
+   # Enalbe version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+   # Dice a Dependabot dove trovare i files
+    directory: "/"
+   # Frequenza con cui Dependabot deve controllare gli aggiornamenti
+    schedule:
+      interval: "daily" # Controlla ogni giorno
+   # (Opzionale) Aggiungi il tuo nome utente GitHub qui
+    # per essere assegnato automaticamente alle Pull Request
+    assignees:
+      - "otigusthewolf"
+   # Etichette da aggiungere alle Pull Request
     labels:
       - "dependencies"
       - "security"
